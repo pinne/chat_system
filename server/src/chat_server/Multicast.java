@@ -31,12 +31,12 @@ public class Multicast {
 	 */
 	public synchronized void sendMessage(Session client, String message) {
 		PrintWriter writer;
-		System.out.println("<" + client.getSocket().getPort()+ "> " + message);
+		System.out.println("<" + client.getNick() + "> " + message);
 
 		for (Session s : sessions) {
 			try {
 				writer = new PrintWriter(s.getSocket().getOutputStream(), true);
-				writer.println("<" + client.getSocket().getPort()+ "> " + message);
+				writer.println("<" + client.getNick() + "> " + message);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -48,12 +48,12 @@ public class Multicast {
 	 */
 	public synchronized void sendStatus(Session client, String message) {
 		PrintWriter writer;
-		System.out.println("-!- " + client.getSocket().getPort()+ " " + message);
+		System.out.println("-!- " + client.getNick() + " " + message);
 
 		for (Session s : sessions) {
 			try {
 				writer = new PrintWriter(s.getSocket().getOutputStream(), true);
-				writer.println("-!- " + client.getSocket().getPort()+ " " + message);
+				writer.println("-!- " + client.getNick() + " " + message);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -67,7 +67,7 @@ public class Multicast {
 		String who = new String();
 
 		for (Session s : sessions) {
-			who = "[" + s.getSocket().getPort() + "]\n" + who;
+			who = "[" + s.getNick() + "]\n" + who;
 		}
 		return who;
 	}

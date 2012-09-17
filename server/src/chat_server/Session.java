@@ -21,6 +21,7 @@ class Session implements Runnable {
 	
 	private PrintWriter stream = null;
 	private Multicast multicaster;
+	private String nick = "";
 	
 	private Socket sock = null;
 	public Socket getSocket() {
@@ -36,13 +37,17 @@ class Session implements Runnable {
 		this.sock = sock;
 		this.multicaster = multicaster;
 		this.connected = true;
+		
+		// Get a random nick. A feature, not a bug!
+		Nicks nicks = new Nicks();
+		this.nick = nicks.getNick();
 	}
 	
 	/**
 	 * Session thread, receives messages from the connected client.
 	 */
 	public void run() {
-		System.out.println("Running thread" + sock.getPort());
+		System.out.println("Running thread " + nick + ": " + sock.toString());
 		
 		try {
 			BufferedReader in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
@@ -50,7 +55,7 @@ class Session implements Runnable {
 			// Get a stream for sending messages to client 
 			stream = new PrintWriter(sock.getOutputStream(), true);
 			// Send a message
-			stream.println("Welcome to the chat server <" + sock.getPort() + ">");				
+			stream.println("Welcome to the chat server <" + nick + ">");				
 			stream.println(printHelp());
 			
 			// Announce the new client
@@ -101,5 +106,9 @@ class Session implements Runnable {
 				+ "/who\t user list\n"
 				+ "/help\t this information\n";
 		return str;
+	}
+
+	public String getNick() {
+		return nick;
 	}
 }

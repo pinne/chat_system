@@ -12,6 +12,7 @@
 package chat_client;
 
 import javax.swing.*;
+
 import java.awt.*;
 import java.awt.event.*;
 import java.net.*;
@@ -35,7 +36,8 @@ public class ChatClient extends JFrame {
 	private DataOutputStream sout = null;
 	private Receiver receiver;
 	private JTextArea text = new JTextArea();
-	private JTextField input = new JTextField(25); 
+	private JTextField input = new JTextField(57); 
+	private JButton button = new JButton("send");
 	
 	/**
 	 * Constructor. Creates the socket, the receiver object and the GUI.
@@ -63,20 +65,34 @@ public class ChatClient extends JFrame {
 				input.setText("");
 			}	
 		});	
+		button.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				send(input.getText());
+				if (input.getText().equalsIgnoreCase("/quit"))
+					cleanUpAndExit();
+				input.setText("");
+			}
+		});
 
 		// Layout stuff...
-		setTitle("TCP chat client");
+		setTitle("Chat client");
 		text.setEditable(false);
 		getContentPane().setLayout(new BorderLayout());
-		getContentPane().add(new JScrollPane(text), BorderLayout.CENTER);
-		JPanel inputPanel = new JPanel();
-		inputPanel.add(new JLabel("Input"));
-		inputPanel.add(input);
-		getContentPane().add(inputPanel, BorderLayout.SOUTH);
+		JPanel inputPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+		Font f = new Font("monospaced", Font.PLAIN, 20);
+		text.setFont(f);
+		
 		input.requestFocus();
+		input.setFont(f);
+		input.setAlignmentY((float) 0.001);
+		inputPanel.add(input);
+		inputPanel.add(button);
 
-		setSize(400, 300);
+		getContentPane().add(new JScrollPane(text), BorderLayout.CENTER);
+		getContentPane().add(inputPanel, BorderLayout.PAGE_END);
+		
 		setVisible(true);
+		setSize(800, 500);
 		
 		// Create a receiver object with a separate thread.
 		receiver = new Receiver(so, text);
@@ -116,11 +132,25 @@ public class ChatClient extends JFrame {
 	 */
 	public static void main(String[] args) throws IOException {
 
-		if(args.length != 1) {
+		if (args.length != 1) {
 			System.out.println("usage: java ChatClient servername");
 			System.exit(0);
 		}		
-
+		
+		// Look-n-feel of the system.
+		try {
+			UIManager.setLookAndFeel(
+			        UIManager.getSystemLookAndFeelClassName());
+		} catch (ClassNotFoundException e1) {
+			e1.printStackTrace();
+		} catch (InstantiationException e1) {
+			e1.printStackTrace();
+		} catch (IllegalAccessException e1) {
+			e1.printStackTrace();
+		} catch (UnsupportedLookAndFeelException e1) {
+			e1.printStackTrace();
+		}
+		
 		// If exceptions occur during initialization, clean up and exit.
 		ChatClient client = null;
 		try {
