@@ -29,14 +29,14 @@ public class Multicast {
 	/**
 	 * Sends a chat message to the connected clients.
 	 */
-	public synchronized void sendMessage(Session client, String message) {
+	public synchronized void sendMessage(Session from, String message) {
 		PrintWriter writer;
-		System.out.println("<" + client.getNick() + "> " + message);
+		System.out.println("<" + from.getNick() + "> " + message);
 
 		for (Session s : sessions) {
 			try {
 				writer = new PrintWriter(s.getSocket().getOutputStream(), true);
-				writer.println("<" + client.getNick() + "> " + message);
+				writer.println("<" + from.getNick() + "> " + message);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
@@ -46,14 +46,14 @@ public class Multicast {
 	/**
 	 * Sends a status message to the connected clients.
 	 */
-	public synchronized void sendStatus(Session client, String message) {
+	public synchronized void sendStatus(Session from, String message) {
 		PrintWriter writer;
-		System.out.println("-!- " + client.getNick() + " " + message);
+		System.out.println("-!- " + from.getNick() + " " + message);
 
 		for (Session s : sessions) {
 			try {
 				writer = new PrintWriter(s.getSocket().getOutputStream(), true);
-				writer.println("-!- " + client.getNick() + " " + message);
+				writer.println("-!- " + from.getNick() + " " + message);
 			} catch (IOException e) {
 				e.printStackTrace();
 			}

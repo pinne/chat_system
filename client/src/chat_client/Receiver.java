@@ -24,7 +24,7 @@ class Receiver implements Runnable {
 	private Socket socket;
 	private JTextArea textArea;
 
-	Receiver(Socket so2, JTextArea textArea) {
+	public Receiver(Socket so2, JTextArea textArea) {
 		this.socket = so2;
 		this.textArea = textArea;
 	}
@@ -68,7 +68,7 @@ class Receiver implements Runnable {
 	 * Append text to the text area, from outside the
 	 * event dispatch thread, in a thread safe manner.
 	 */
-	void appendText(final String msg) {
+	private void appendText(final String msg) {
 		SwingUtilities.invokeLater(  // Add to the event dispatch threads queue
 				new Runnable() {
 					public void run() {
