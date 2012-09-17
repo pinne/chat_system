@@ -1,4 +1,4 @@
-#Chat server
+#Chat system
 
 UML for the server
 
