@@ -18,8 +18,9 @@ import java.net.*;
 import java.io.*;
 
 /** 
- * This class creates the gui and handle outgoing packets (on the event 
+ * This class creates the GUI and handle outgoing packets (on the event 
  * dispatch thread).
+ * 
  * Incoming packets are handled on a separate thread in the class 
  * Receiver.
  */
@@ -80,10 +81,10 @@ public class ChatClient extends JFrame {
 		// Create a receiver object with a separate thread.
 		receiver = new Receiver(so, text);
 		receiver.start();
-
 	}
 
-	/** Send a datagram packet.
+	/**
+	 * Send a message to the server.
 	 */
 	public void send(String msg) {
 		try {
@@ -95,6 +96,9 @@ public class ChatClient extends JFrame {
 
 	}
 
+	/**
+	 * Closes the sockets and destroys the window before exit.
+	 */
 	private void cleanUpAndExit() {
 		try {
 			receiver.stop();
@@ -108,7 +112,7 @@ public class ChatClient extends JFrame {
 	}
 
 	/**
-	 * The main method
+	 * Start an instance of ChatClient.
 	 */
 	public static void main(String[] args) throws IOException {
 
