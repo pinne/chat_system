@@ -1,65 +1,82 @@
+/**
+ * Chat system - Server
+ * 
+ * Communication Systems, HI1032
+ * Lab assignment 3 - Client-Server programming
+ * 
+ * Simon Kers      skers@kth.se
+ * Sakib Pathan    sakibp@kth.se
+ *                                 KTH STH 2012
+ */
+
 package chat_server;
 
 import java.io.*;
-import java.util.*;
 import java.net.Socket;
 
 /**
- * The class that handles a client in a separate thread
+ * The class that handles a client in a separate thread.
  */
 class Session implements Runnable {
 	
-	private boolean connected = false;
+	private PrintWriter stream = null;
+	private Multicast multicaster;
+	
 	private Socket sock = null;
-	private PrintWriter sout = null;
-	private Broadcaster broadcaster;
-	private static List<Session> sessions;
-	
-	Session(Socket sock, Broadcaster broadcaster, List<Session> sessions) {
-		this.sock = sock;
-		this.broadcaster = broadcaster;
-		this.sessions = sessions;
-		this.connected = true;
-	}
-	
 	public Socket getSocket() {
 		return sock;
 	}
 	
-	// The thread activity, send a single message and then exit.
+	private boolean connected = false;
+	
+	/**
+	 * Every session holds a reference to the common multicast object.
+	 */
+	public Session(Socket sock, Multicast multicaster) {
+		this.sock = sock;
+		this.multicaster = multicaster;
+		this.connected = true;
+	}
+	
+	/**
+	 * Session thread, receives messages from the connected client.
+	 */
 	public void run() {
-		
 		System.out.println("Running thread" + sock.getPort());
+		
 		try {
 			BufferedReader in = new BufferedReader(new InputStreamReader(sock.getInputStream()));
 
 			// Get a stream for sending messages to client 
-			// true = auto flush
-			sout = new PrintWriter(sock.getOutputStream(), true);
+			stream = new PrintWriter(sock.getOutputStream(), true);
 			// Send a message
-			sout.println("Welcome to the chat server <" + sock.getPort() + ">");				
-			sout.println(printHelp());
+			stream.println("Welcome to the chat server <" + sock.getPort() + ">");				
+			stream.println(printHelp());
 			
 			// Announce the new client
-			broadcaster.sendStatus(this, "joined the server");
+			multicaster.sendStatus(this, "joined the server");
 			
 			while (connected) {
 				String message = in.readLine();
 				if (message.startsWith("/"))
-					command(sout, message);
+					command(stream, message);
 				else
-					broadcaster.sendMessage(this, message);
+					multicaster.sendMessage(this, message);
 			}
-		}
-		catch(IOException ie) {
+		} catch(IOException ie) {
 			System.err.println(ie.toString());
-		}
-		finally {
-			broadcaster.sendStatus(this, "left the server");
-			sessions.remove(this);
+		} finally {
+			// Close the connection and remove the session from the list.
+			multicaster.sendStatus(this, "left the server");
+			multicaster.dropSession(this);
+			
+			if (stream != null)
+				stream.close();
+				
 			try {
-				if(sock != null)
+				if(sock != null) {
 					sock.close();
+				}
 			} catch(Exception e) {}
 		}
 	}
@@ -71,7 +88,7 @@ class Session implements Runnable {
 		if (message.equals("/quit")) {
 			connected = false;
 		} else if (message.equals("/who")) {
-			sout.println(broadcaster.getWho());
+			sout.println(multicaster.getWho());
 		} else if (message.equals("/help")) {
 			sout.println(printHelp());
 		}
