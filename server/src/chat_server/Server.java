@@ -12,7 +12,6 @@
 package chat_server;
 
 import java.net.*;
-import java.util.*;
 import java.io.*;
 
 /**
@@ -22,7 +21,6 @@ import java.io.*;
 public class Server {
 
 	public static final int PORT = 3490;
-	private static List<Session> sessions = new ArrayList<Session>();
 
 	public static void main(String[] args) throws IOException {
 		ServerSocket servSock = null;
@@ -32,7 +30,7 @@ public class Server {
 			servSock = new ServerSocket(PORT);
 
 			// Create multicaster for sending messages to everyone
-			Multicast multicaster = new Multicast(sessions, servSock);
+			Multicast multicaster = new Multicast(servSock);
 
 			// Listen to incoming connections.
 			while(true) {
@@ -44,9 +42,7 @@ public class Server {
 				Session client = new Session(sock, multicaster);
 				new Thread(client).start();
 
-				synchronized (sessions) {
-					sessions.add(client);
-				}
+				multicaster.addSession(client);
 			}
 		}
 		// Close the  server socket...

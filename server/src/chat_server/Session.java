@@ -63,6 +63,8 @@ class Session implements Runnable {
 			
 			while (connected) {
 				String message = in.readLine();
+				if (message == null)
+					break;
 				if (message.startsWith("/"))
 					command(stream, message);
 				else

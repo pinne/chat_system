@@ -92,7 +92,7 @@ public class ChatClient extends JFrame {
 		getContentPane().add(inputPanel, BorderLayout.PAGE_END);
 		
 		setVisible(true);
-		setSize(800, 500);
+		setSize(800, 400);
 		
 		// Create a receiver object with a separate thread.
 		receiver = new Receiver(so, text);

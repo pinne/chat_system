@@ -20,10 +20,10 @@ import java.util.*;
  * communicates to other sessions through this object.
  */
 public class Multicast {
-	private static List<Session> sessions;
+	private List<Session> sessions;
 
-	public Multicast(List<Session> sessions, ServerSocket sock) {
-		Multicast.sessions = sessions;
+	public Multicast(ServerSocket sock) {
+		sessions = new ArrayList<Session>();
 	}
 
 	/**
@@ -33,12 +33,14 @@ public class Multicast {
 		PrintWriter writer;
 		System.out.println("<" + from.getNick() + "> " + message);
 
-		for (Session s : sessions) {
-			try {
-				writer = new PrintWriter(s.getSocket().getOutputStream(), true);
-				writer.println("<" + from.getNick() + "> " + message);
-			} catch (IOException e) {
-				e.printStackTrace();
+		synchronized (sessions) {
+			for (Session s : sessions) {
+				try {
+					writer = new PrintWriter(s.getSocket().getOutputStream(), true);
+					writer.println("<" + from.getNick() + "> " + message);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -50,12 +52,14 @@ public class Multicast {
 		PrintWriter writer;
 		System.out.println("-!- " + from.getNick() + " " + message);
 
-		for (Session s : sessions) {
-			try {
-				writer = new PrintWriter(s.getSocket().getOutputStream(), true);
-				writer.println("-!- " + from.getNick() + " " + message);
-			} catch (IOException e) {
-				e.printStackTrace();
+		synchronized (sessions) {
+			for (Session s : sessions) {
+				try {
+					writer = new PrintWriter(s.getSocket().getOutputStream(), true);
+					writer.println("-!- " + from.getNick() + " " + message);
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
 			}
 		}
 	}
@@ -66,8 +70,10 @@ public class Multicast {
 	public String getWho() {
 		String who = new String();
 
-		for (Session s : sessions) {
-			who = "[" + s.getNick() + "]\n" + who;
+		synchronized (sessions) {
+			for (Session s : sessions) {
+				who = "[" + s.getNick() + "]\n" + who;
+			}
 		}
 		return who;
 	}
@@ -76,7 +82,15 @@ public class Multicast {
 	 * When a client disconnect, this removes a session from the
 	 * collection upon a request for the terminating session.
 	 */
-	public synchronized void dropSession(Session session) {
-		sessions.remove(session);
+	public void dropSession(Session session) {
+		synchronized (sessions) {
+			sessions.remove(session);
+		}
+	}
+	
+	public void addSession(Session s) {
+		synchronized (sessions) {
+			sessions.add(s);
+		}
 	}
 }
